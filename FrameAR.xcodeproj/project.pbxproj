@@ -1,0 +1,433 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		554497CF2B15554D00374131 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 554497CE2B15554D00374131 /* ImagePicker.swift */; };
+		5544A6B62B1770640002023F /* FocusEntity in Frameworks */ = {isa = PBXBuildFile; productRef = 5544A6B52B1770640002023F /* FocusEntity */; };
+		559054C02B0CDE6E00AFBFE0 /* FrameARApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054BF2B0CDE6E00AFBFE0 /* FrameARApp.swift */; };
+		559054C22B0CDE6E00AFBFE0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054C12B0CDE6E00AFBFE0 /* ContentView.swift */; };
+		559054C42B0CDE6F00AFBFE0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 559054C32B0CDE6F00AFBFE0 /* Assets.xcassets */; };
+		559054C72B0CDE6F00AFBFE0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 559054C62B0CDE6F00AFBFE0 /* Preview Assets.xcassets */; };
+		559054CF2B0CDEE300AFBFE0 /* CustomARView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054CE2B0CDEE300AFBFE0 /* CustomARView.swift */; };
+		559054D12B0CE00D00AFBFE0 /* CustomARViewRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054D02B0CE00D00AFBFE0 /* CustomARViewRepresentable.swift */; };
+		559054D32B0CF46D00AFBFE0 /* ARAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054D22B0CF46D00AFBFE0 /* ARAction.swift */; };
+		559054D52B0CF4DB00AFBFE0 /* ARManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054D42B0CF4DB00AFBFE0 /* ARManager.swift */; };
+		55A3B92A2B10CD68005D9A69 /* ImageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55A3B9292B10CD68005D9A69 /* ImageHandler.swift */; };
+		55AE20E22B1652C90084C10C /* ModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55AE20E12B1652C90084C10C /* ModalView.swift */; };
+		55F8321E2B17E8AA00C3F221 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F8321D2B17E8AA00C3F221 /* Settings.swift */; };
+		55F832202B17EFA000C3F221 /* EntityModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F8321F2B17EFA000C3F221 /* EntityModalView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		554497CE2B15554D00374131 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		559054BC2B0CDE6E00AFBFE0 /* FrameAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FrameAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		559054BF2B0CDE6E00AFBFE0 /* FrameARApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameARApp.swift; sourceTree = "<group>"; };
+		559054C12B0CDE6E00AFBFE0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		559054C32B0CDE6F00AFBFE0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		559054C62B0CDE6F00AFBFE0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		559054CE2B0CDEE300AFBFE0 /* CustomARView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomARView.swift; sourceTree = "<group>"; };
+		559054D02B0CE00D00AFBFE0 /* CustomARViewRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomARViewRepresentable.swift; sourceTree = "<group>"; };
+		559054D22B0CF46D00AFBFE0 /* ARAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARAction.swift; sourceTree = "<group>"; };
+		559054D42B0CF4DB00AFBFE0 /* ARManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARManager.swift; sourceTree = "<group>"; };
+		55A3B9122B0E5AD1005D9A69 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		55A3B9292B10CD68005D9A69 /* ImageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageHandler.swift; sourceTree = "<group>"; };
+		55AE20E12B1652C90084C10C /* ModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalView.swift; sourceTree = "<group>"; };
+		55F8321D2B17E8AA00C3F221 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		55F8321F2B17EFA000C3F221 /* EntityModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntityModalView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		559054B92B0CDE6E00AFBFE0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5544A6B62B1770640002023F /* FocusEntity in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		559054B32B0CDE6E00AFBFE0 = {
+			isa = PBXGroup;
+			children = (
+				559054BE2B0CDE6E00AFBFE0 /* FrameAR */,
+				559054BD2B0CDE6E00AFBFE0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		559054BD2B0CDE6E00AFBFE0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				559054BC2B0CDE6E00AFBFE0 /* FrameAR.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		559054BE2B0CDE6E00AFBFE0 /* FrameAR */ = {
+			isa = PBXGroup;
+			children = (
+				55A3B91F2B0E7EED005D9A69 /* Image */,
+				55A3B9122B0E5AD1005D9A69 /* Info.plist */,
+				559054CD2B0CDEB000AFBFE0 /* AR */,
+				559054BF2B0CDE6E00AFBFE0 /* FrameARApp.swift */,
+				559054C12B0CDE6E00AFBFE0 /* ContentView.swift */,
+				559054C32B0CDE6F00AFBFE0 /* Assets.xcassets */,
+				559054C52B0CDE6F00AFBFE0 /* Preview Content */,
+				55AE20E12B1652C90084C10C /* ModalView.swift */,
+				55F8321D2B17E8AA00C3F221 /* Settings.swift */,
+				55F8321F2B17EFA000C3F221 /* EntityModalView.swift */,
+			);
+			path = FrameAR;
+			sourceTree = "<group>";
+		};
+		559054C52B0CDE6F00AFBFE0 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				559054C62B0CDE6F00AFBFE0 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		559054CD2B0CDEB000AFBFE0 /* AR */ = {
+			isa = PBXGroup;
+			children = (
+				559054D22B0CF46D00AFBFE0 /* ARAction.swift */,
+				559054CE2B0CDEE300AFBFE0 /* CustomARView.swift */,
+				559054D02B0CE00D00AFBFE0 /* CustomARViewRepresentable.swift */,
+				559054D42B0CF4DB00AFBFE0 /* ARManager.swift */,
+			);
+			path = AR;
+			sourceTree = "<group>";
+		};
+		55A3B91F2B0E7EED005D9A69 /* Image */ = {
+			isa = PBXGroup;
+			children = (
+				55A3B9292B10CD68005D9A69 /* ImageHandler.swift */,
+				554497CE2B15554D00374131 /* ImagePicker.swift */,
+			);
+			path = Image;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		559054BB2B0CDE6E00AFBFE0 /* FrameAR */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 559054CA2B0CDE6F00AFBFE0 /* Build configuration list for PBXNativeTarget "FrameAR" */;
+			buildPhases = (
+				559054B82B0CDE6E00AFBFE0 /* Sources */,
+				559054B92B0CDE6E00AFBFE0 /* Frameworks */,
+				559054BA2B0CDE6E00AFBFE0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FrameAR;
+			packageProductDependencies = (
+				5544A6B52B1770640002023F /* FocusEntity */,
+			);
+			productName = FrameAR;
+			productReference = 559054BC2B0CDE6E00AFBFE0 /* FrameAR.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		559054B42B0CDE6E00AFBFE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1510;
+				TargetAttributes = {
+					559054BB2B0CDE6E00AFBFE0 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 559054B72B0CDE6E00AFBFE0 /* Build configuration list for PBXProject "FrameAR" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 559054B32B0CDE6E00AFBFE0;
+			packageReferences = (
+				5544A6B42B1770640002023F /* XCRemoteSwiftPackageReference "FocusEntity" */,
+			);
+			productRefGroup = 559054BD2B0CDE6E00AFBFE0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				559054BB2B0CDE6E00AFBFE0 /* FrameAR */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		559054BA2B0CDE6E00AFBFE0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				559054C72B0CDE6F00AFBFE0 /* Preview Assets.xcassets in Resources */,
+				559054C42B0CDE6F00AFBFE0 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		559054B82B0CDE6E00AFBFE0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				55A3B92A2B10CD68005D9A69 /* ImageHandler.swift in Sources */,
+				559054C22B0CDE6E00AFBFE0 /* ContentView.swift in Sources */,
+				559054CF2B0CDEE300AFBFE0 /* CustomARView.swift in Sources */,
+				55F8321E2B17E8AA00C3F221 /* Settings.swift in Sources */,
+				559054D32B0CF46D00AFBFE0 /* ARAction.swift in Sources */,
+				55AE20E22B1652C90084C10C /* ModalView.swift in Sources */,
+				559054C02B0CDE6E00AFBFE0 /* FrameARApp.swift in Sources */,
+				55F832202B17EFA000C3F221 /* EntityModalView.swift in Sources */,
+				559054D52B0CF4DB00AFBFE0 /* ARManager.swift in Sources */,
+				559054D12B0CE00D00AFBFE0 /* CustomARViewRepresentable.swift in Sources */,
+				554497CF2B15554D00374131 /* ImagePicker.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		559054C82B0CDE6F00AFBFE0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		559054C92B0CDE6F00AFBFE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		559054CB2B0CDE6F00AFBFE0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FrameAR/Preview Content\"";
+				DEVELOPMENT_TEAM = 5832N6VSY2;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FrameAR/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Needed to show AR View.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Needs access to photo library.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = omart.FrameAR;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		559054CC2B0CDE6F00AFBFE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"FrameAR/Preview Content\"";
+				DEVELOPMENT_TEAM = 5832N6VSY2;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FrameAR/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Needed to show AR View.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Needs access to photo library.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = omart.FrameAR;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		559054B72B0CDE6E00AFBFE0 /* Build configuration list for PBXProject "FrameAR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				559054C82B0CDE6F00AFBFE0 /* Debug */,
+				559054C92B0CDE6F00AFBFE0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		559054CA2B0CDE6F00AFBFE0 /* Build configuration list for PBXNativeTarget "FrameAR" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				559054CB2B0CDE6F00AFBFE0 /* Debug */,
+				559054CC2B0CDE6F00AFBFE0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5544A6B42B1770640002023F /* XCRemoteSwiftPackageReference "FocusEntity" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/maxxfrazer/FocusEntity";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5544A6B52B1770640002023F /* FocusEntity */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5544A6B42B1770640002023F /* XCRemoteSwiftPackageReference "FocusEntity" */;
+			productName = FocusEntity;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 559054B42B0CDE6E00AFBFE0 /* Project object */;
+}
