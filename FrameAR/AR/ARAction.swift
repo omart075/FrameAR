@@ -8,4 +8,5 @@ enum ARAction {
     case deselectEntity
     case scaleEntity(scale: Double)
     case rotateEntity(angle: Double)
+    case hangFrames
 }

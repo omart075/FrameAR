@@ -7,8 +7,10 @@ import PhotosUI
 
 class CustomARView: ARView, ARSessionDelegate{
     private let imageHandler = ImageHandler()
+    private var entities: [ModelEntity] = []
     
     // TODO: create custom Entity class to store these values per object
+    private var entityImages: [String: URL] = [:]
     private var isTapped: Bool = false
     private var isSwitching: Bool = false
     private var selectedEntity: ModelEntity? = nil
@@ -53,6 +55,8 @@ class CustomARView: ARView, ARSessionDelegate{
                         self?.scaleEntity(scale: scale)
                     case .rotateEntity(let angle):
                         self?.rotateEntity(angle: angle)
+                    case .hangFrames:
+                        self?.hangFrames()
                 }
             }
             .store(in: &cancellables)
@@ -78,6 +82,7 @@ class CustomARView: ARView, ARSessionDelegate{
     }
     
     func addEntities(images: [UIImage]) {
+        var scaledFrames: [[String: Float]] = []
         let imageWidth = Float(1072.0)
         let imageHeight = Float(1072.0)
         let frames: [[String: Float]] = [
@@ -106,21 +111,19 @@ class CustomARView: ARView, ARSessionDelegate{
                 "height": 140.0
             ]
         ]
-        var scaledFrames: [[String: Float]] = []
         
         for (n, image) in images.enumerated() {
             let screenPoints: [String: Float] = ImageHandler().convertPixelToPoint(frame: frames[n], imageWidth: imageWidth, imageHeight: imageHeight)
             scaledFrames.append(screenPoints)
             
+            // pin frame based on its center
             let pinLocation: CGPoint = CGPoint(x: Double(screenPoints["x"]! + (screenPoints["width"]!/2)), y: Double(screenPoints["y"]! + (screenPoints["height"]!/2)))
             addEntity(image: image, pinLocation: pinLocation)
-            
         }
     }
     
     // creat world anchor and add 3d object to anchor
     func anchorEntity(entity: ModelEntity, worldPos: ARRaycastResult){
-        // let coordinateAnchor = AnchorEntity(.plane(.vertical, classification: .wall, minimumBounds: SIMD2(repeating: 0)))
         let coordinateAnchor = AnchorEntity(raycastResult: worldPos)
         
         coordinateAnchor.addChild(entity)
@@ -138,18 +141,113 @@ class CustomARView: ARView, ARSessionDelegate{
         else{
             material.color = .init(tint: .black)
         }
-        // material.metallic = .float(1.0)
         material.roughness = .float(0.0)
 
         let entity = ModelEntity(mesh: mesh, materials: [material])
         
         entity.generateCollisionShapes(recursive: true)
         entity.name = UUID().uuidString
-        installGestures(.all, for: entity)
+        
+        installGestures(.translation, for: entity)
+        
+        entities.append(entity)
+        entityImages[entity.name] = filePath
         
         return entity
     }
     
+    // convert pixels to meters
+    // meters = (pixels * (cm in an inch / ppi))/100
+    // where pixels = points * scale
+    func pixelsToMeters(x: Float, y: Float) -> (Float, Float){
+        let dpi = 300.0// dpi used to print photos
+        let cm = 2.54 // in -> cm
+        
+        let xInMeters = (x * Float(cm/dpi)) / 100
+        let yInMeters = (y * Float(cm/dpi)) / 100
+        
+        return (xInMeters, yInMeters)
+    }
+    
+    func deselectEntity() {
+        let entity = scene.findEntity(named: Settings.shared.selectedEntityName)
+        if entity != nil {
+            Settings.shared.showEntityModal = false
+            isTapped = false
+
+            entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]
+            // if entity was translated while selected
+            entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(entity!.position.x)
+            entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(entity!.position.z)
+            
+            selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                            y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                            z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                               rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                    axis: [0,1,0]),
+                                               translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                  y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
+                                                                  z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
+                                 relativeTo: selectedEntity!.parent,
+                                 duration: 0.5,
+                                 timingFunction: .easeInOut)
+        }
+    }
+    
+    func scaleEntity(scale: Double) {
+        if !isSwitching && selectedEntity != nil {
+            // calculate new scaled values
+            let x = entityInfo[selectedEntity!.name]!["origScaleX"]! * scale
+            let y = entityInfo[selectedEntity!.name]!["origScaleY"]! * scale
+            let z = entityInfo[selectedEntity!.name]!["origScaleZ"]! * scale
+            
+            // TODO: apply scale temporarily?
+            selectedEntity!.scale.x = Float(x)
+            selectedEntity!.scale.y = Float(y)
+            selectedEntity!.scale.z = Float(z)
+            
+            // save new values
+            entityInfo[selectedEntity!.name]!["scale"] = scale
+            entityInfo[selectedEntity!.name]!["newScaleX"] = x
+            entityInfo[selectedEntity!.name]!["newScaleY"] = y
+            entityInfo[selectedEntity!.name]!["newScaleZ"] = z
+        }
+    }
+    
+    func rotateEntity(angle: Double) {
+        if !isSwitching && selectedEntity != nil {
+            // convert degrees to radians, multiply by -1 to flip direction (more user friendly)
+            let newAngle = (-1 * angle * .pi) / 180
+            
+            // TODO: apply rotation temporarily?
+            selectedEntity!.orientation = simd_quatf(angle: Float(newAngle), axis: SIMD3<Float>(0,1,0))
+            
+            entityInfo[selectedEntity!.name]!["newAngle"] = newAngle
+        }
+    }
+    
+    func hangFrames() {
+        var material = SimpleMaterial()
+        
+        if Settings.shared.isHanging {
+            entities.forEach { entity in
+                let texture = try? TextureResource.load(contentsOf: entityImages[entity.name]!)
+                material.color = .init(tint: .white.withAlphaComponent(0.5), texture: .init(texture!))
+                
+                entity.model?.materials = [material]
+            }
+        }
+        else {
+            entities.forEach { entity in
+                let texture = try? TextureResource.load(contentsOf: entityImages[entity.name]!)
+                material.color = .init(tint: .white, texture: .init(texture!))
+                
+                entity.model?.materials = [material]
+            }
+        }
+    }
+    
+    // TODO: might be useful later
     // create points of a picture frame from an image in 3d world space
     func convertImageToWorldSpace() {
         let imageWidth = Float(1072.0)
@@ -206,6 +304,7 @@ class CustomARView: ARView, ARSessionDelegate{
         }
     }
     
+    // TODO: might be useful later
     func createPoint(results: [ARRaycastResult]) {
         if let firstResult = results.first {
             let worldPos = simd_make_float3(firstResult.worldTransform.columns.3)
@@ -213,81 +312,9 @@ class CustomARView: ARView, ARSessionDelegate{
             let material = SimpleMaterial(color: .blue, roughness: 0, isMetallic: true)
             let entity = ModelEntity(mesh: sphere, materials: [material])
             let anchorEntity = AnchorEntity(world: worldPos)
+            
             anchorEntity.addChild(entity)
             scene.addAnchor(anchorEntity)
-        }
-    }
-    
-    // convert pixels to meters
-    // meters = (pixels * (cm in an inch / ppi))/100
-    func pixelsToMeters(x: Float, y: Float) -> (Float, Float){
-        let dpi = 300.0// dpi used to print photos
-        let cm = 2.54 // in -> cm
-        
-        let xInMeters = (x * Float(cm/dpi)) / 100
-        let yInMeters = (y * Float(cm/dpi)) / 100
-        
-        return (xInMeters, yInMeters)
-    }
-    
-    func deselectEntity() {
-        let entity = scene.findEntity(named: Settings.shared.selectedEntityName)
-        if entity != nil {
-            Settings.shared.showEntityModal = false
-            isTapped = false
-
-            entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]
-            // if entity was translated while selected
-            entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(entity!.position.x)
-            entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(entity!.position.z)
-            
-            let translateX = Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!)
-            let translateY = Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!)
-            let translateZ = Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!)
-            
-            let scaleX = Float(entityInfo[selectedEntity!.name]!["newScaleX"]!)
-            let scaleY = Float(entityInfo[selectedEntity!.name]!["newScaleY"]!)
-            let scaleZ = Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)
-            
-            let angle = Float(entityInfo[selectedEntity!.name]!["newAngle"]!)
-            
-            selectedEntity!.move(to: Transform(scale: .init(x: scaleX, y: scaleY, z: scaleZ),
-                                               rotation: simd_quatf(angle: angle, axis: [0,1,0]),
-                                               translation: .init(x: translateX, y: translateY, z: translateZ)),
-                                 relativeTo: selectedEntity!.parent,
-                                 duration: 0.5,
-                                 timingFunction: .easeInOut)
-        }
-        
-    }
-    
-    func scaleEntity(scale: Double) {
-        if !isSwitching && selectedEntity != nil {
-            // calculate new scaled values
-            let x = entityInfo[selectedEntity!.name]!["origScaleX"]! * scale
-            let y = entityInfo[selectedEntity!.name]!["origScaleY"]! * scale
-            let z = entityInfo[selectedEntity!.name]!["origScaleZ"]! * scale
-            
-            // TODO: apply scale temporarily?
-            selectedEntity!.scale.x = Float(x)
-            selectedEntity!.scale.y = Float(y)
-            selectedEntity!.scale.z = Float(z)
-            
-            // save new values
-            entityInfo[selectedEntity!.name]!["scale"] = scale
-            entityInfo[selectedEntity!.name]!["newScaleX"] = x
-            entityInfo[selectedEntity!.name]!["newScaleY"] = y
-            entityInfo[selectedEntity!.name]!["newScaleZ"] = z
-        }
-    }
-    
-    func rotateEntity(angle: Double) {
-        if !isSwitching && selectedEntity != nil {
-            let newAngle = (-1 * angle * .pi) / 180
-            
-            selectedEntity!.orientation = simd_quatf(angle: Float(newAngle), axis: SIMD3<Float>(0,1,0))
-            
-            entityInfo[selectedEntity!.name]!["newAngle"] = newAngle
         }
     }
 }
@@ -305,9 +332,9 @@ extension CustomARView {
         let hitEntity = self.entity(at: touchInView) as? ModelEntity
           
         if hitEntity != nil {
-            // get entity information
+            // get/set entity information
             if !entityInfo.contains(where: { $0.key == hitEntity!.name}) {
-                let info: [String: Double] = [
+                entityInfo[hitEntity!.name] = [
                     "origTranslateX": Double(hitEntity!.position.x),
                     "origTranslateY": Double(hitEntity!.position.y),
                     "origTranslateZ": Double(hitEntity!.position.z),
@@ -324,9 +351,9 @@ extension CustomARView {
                     "origAngle": Double(hitEntity!.orientation.angle),
                     "newAngle": Double(hitEntity!.orientation.angle)
                 ]
-                entityInfo[hitEntity!.name] = info
             }
             
+//            Settings.shared.cameraTransform = self.cameraTransform
             Settings.shared.selectedEntityName = hitEntity!.name
             Settings.shared.showEntityModal = true
             
@@ -348,19 +375,14 @@ extension CustomARView {
                     entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
                     entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
                     
-                    let translateX = Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!)
-                    let translateY = Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!)
-                    let translateZ = Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!)
-                    
-                    let scaleX = Float(entityInfo[selectedEntity!.name]!["newScaleX"]!)
-                    let scaleY = Float(entityInfo[selectedEntity!.name]!["newScaleY"]!)
-                    let scaleZ = Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)
-                    
-                    let angle = Float(entityInfo[selectedEntity!.name]!["newAngle"]!)
-                    
-                    selectedEntity!.move(to: Transform(scale: .init(x: scaleX, y: scaleY, z: scaleZ),
-                                                       rotation: simd_quatf(angle: angle, axis: [0,1,0]),
-                                                       translation: .init(x: translateX, y: translateY, z: translateZ)),
+                    selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                                    y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                                    z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                                       rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                            axis: [0,1,0]),
+                                                       translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                          y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
+                                                                          z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
                                          relativeTo: selectedEntity!.parent,
                                          duration: 0.5,
                                          timingFunction: .easeInOut)
@@ -370,10 +392,12 @@ extension CustomARView {
                     // reset vars for new entity
                     selectedEntity = hitEntity
                     entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(hitEntity!.position.x)
-                    entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]! + 0.2
+//                    entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]! + 0.2
+                    entityInfo[selectedEntity!.name]!["newTranslateY"] = Double(hitEntity!.position.y + 0.2)
                     entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(hitEntity!.position.z)
                     
                     Settings.shared.scale = entityInfo[selectedEntity!.name]!["scale"]!
+                    // convert radians back to degrees for slider
                     Settings.shared.angle = (-1 * entityInfo[selectedEntity!.name]!["newAngle"]! * 180) / .pi
                 }
             }
@@ -388,23 +412,19 @@ extension CustomARView {
                 entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(hitEntity!.position.z)
                 
                 Settings.shared.scale = entityInfo[selectedEntity!.name]!["scale"]!
+                // convert radians back to degrees for slider
                 Settings.shared.angle = (-1 * entityInfo[selectedEntity!.name]!["newAngle"]! * 180) / .pi
             }
             
-            let translateX = Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!)
-            let translateY = Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!)
-            let translateZ = Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!)
-            
-            let scaleX = Float(entityInfo[selectedEntity!.name]!["newScaleX"]!)
-            let scaleY = Float(entityInfo[selectedEntity!.name]!["newScaleY"]!)
-            let scaleZ = Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)
-            
-            let angle = Float(entityInfo[selectedEntity!.name]!["newAngle"]!)
-            
             // scale, rotate, and translate
-            let animation = selectedEntity!.move(to: Transform(scale: .init(x: scaleX, y: scaleY, z: scaleZ),
-                                                               rotation: simd_quatf(angle: angle, axis: [0,1,0]),
-                                                               translation: .init(x: translateX, y: translateY, z: translateZ)),
+            let animation = selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                                            y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                                            z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                                               rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                                    axis: [0,1,0]),
+                                                               translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                                  y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
+                                                                                  z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
                                  relativeTo: selectedEntity!.parent,
                                  duration: 0.5,
                                  timingFunction: .easeInOut)
@@ -423,20 +443,15 @@ extension CustomARView {
                 entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
                 entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
                 
-                let translateX = Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!)
-                let translateY = Float(entityInfo[selectedEntity!.name]!["origTranslateY"]!)
-                let translateZ = Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!)
-                
-                let scaleX = Float(entityInfo[selectedEntity!.name]!["newScaleX"]!)
-                let scaleY = Float(entityInfo[selectedEntity!.name]!["newScaleY"]!)
-                let scaleZ = Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)
-                
-                let angle = Float(entityInfo[selectedEntity!.name]!["newAngle"]!)
-                
                 // scale and translate
-                selectedEntity!.move(to: Transform(scale: .init(x: scaleX, y: scaleY, z: scaleZ),
-                                                   rotation: simd_quatf(angle: angle, axis: [0,1,0]),
-                                                   translation: .init(x: translateX, y: translateY, z: translateZ)),
+                selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                                y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                                z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                                   rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                        axis: [0,1,0]),
+                                                   translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                      y: Float(entityInfo[selectedEntity!.name]!["origTranslateY"]!),
+                                                                      z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
                                      relativeTo: selectedEntity!.parent,
                                      duration: 0.5,
                                      timingFunction: .easeInOut)

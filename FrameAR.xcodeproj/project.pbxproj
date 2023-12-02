@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		553D4C592B1AC794004F6EF8 /* CustomARSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553D4C582B1AC794004F6EF8 /* CustomARSystem.swift */; };
 		554497CF2B15554D00374131 /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 554497CE2B15554D00374131 /* ImagePicker.swift */; };
 		5544A6B62B1770640002023F /* FocusEntity in Frameworks */ = {isa = PBXBuildFile; productRef = 5544A6B52B1770640002023F /* FocusEntity */; };
 		559054C02B0CDE6E00AFBFE0 /* FrameARApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559054BF2B0CDE6E00AFBFE0 /* FrameARApp.swift */; };
@@ -24,6 +25,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		553D4C582B1AC794004F6EF8 /* CustomARSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomARSystem.swift; sourceTree = "<group>"; };
 		554497CE2B15554D00374131 /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		559054BC2B0CDE6E00AFBFE0 /* FrameAR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FrameAR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		559054BF2B0CDE6E00AFBFE0 /* FrameARApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameARApp.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 				559054CE2B0CDEE300AFBFE0 /* CustomARView.swift */,
 				559054D02B0CE00D00AFBFE0 /* CustomARViewRepresentable.swift */,
 				559054D42B0CF4DB00AFBFE0 /* ARManager.swift */,
+				553D4C582B1AC794004F6EF8 /* CustomARSystem.swift */,
 			);
 			path = AR;
 			sourceTree = "<group>";
@@ -196,6 +199,7 @@
 				55F8321E2B17E8AA00C3F221 /* Settings.swift in Sources */,
 				559054D32B0CF46D00AFBFE0 /* ARAction.swift in Sources */,
 				55AE20E22B1652C90084C10C /* ModalView.swift in Sources */,
+				553D4C592B1AC794004F6EF8 /* CustomARSystem.swift in Sources */,
 				559054C02B0CDE6E00AFBFE0 /* FrameARApp.swift in Sources */,
 				55F832202B17EFA000C3F221 /* EntityModalView.swift in Sources */,
 				559054D52B0CF4DB00AFBFE0 /* ARManager.swift in Sources */,
