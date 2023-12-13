@@ -8,6 +8,7 @@ import PhotosUI
 class CustomARView: ARView, ARSessionDelegate{
     private let imageHandler = ImageHandler()
     private var entities: [ModelEntity] = []
+    private var gestures: [String: EntityGestureRecognizer?] = [:]
     
     // TODO: create custom Entity class to store these values per object
     private var entityImages: [String: URL] = [:]
@@ -46,7 +47,7 @@ class CustomARView: ARView, ARSessionDelegate{
                     case .addEntities(let images):
                         self?.addEntities(images: images)
                     case .removeAllAnchors:
-                        self?.scene.anchors.removeAll()
+                        self?.removeAnchors()
                     case .convertImageToWorldSpace:
                         self?.convertImageToWorldSpace()
                     case .deselectEntity:
@@ -67,15 +68,22 @@ class CustomARView: ARView, ARSessionDelegate{
         session.run(config)
     }
     
+    func removeAnchors() {
+        scene.anchors.removeAll()
+        entities = []
+        entityImages = [:]
+    }
+    
     func addEntity(image: UIImage, pinLocation: CGPoint) {
         let results = raycast(from: pinLocation, allowing: .estimatedPlane, alignment: .vertical)
         
         if let firstResult = results.first {
             let (width, height) = pixelsToMeters(x: Float(image.size.width * image.scale), y: Float(image.size.height * image.scale))
             
-            let filePath = imageHandler.saveImage(image: image, name: UUID().uuidString)
+            let name = UUID().uuidString
+            let filePath = imageHandler.saveImage(image: image, name: name)
             if filePath != nil{
-                anchorEntity(entity: createPlane(filePath: filePath!, width: width, height: height), worldPos: firstResult)
+                anchorEntity(entity: createPlane(filePath: filePath!, name: name, width: width, height: height), worldPos: firstResult)
             }
         }
         else { return }
@@ -130,7 +138,7 @@ class CustomARView: ARView, ARSessionDelegate{
         scene.addAnchor(coordinateAnchor)
     }
         
-    func createPlane(filePath: URL, width: Float, height: Float) -> ModelEntity {
+    func createPlane(filePath: URL, name: String, width: Float, height: Float) -> ModelEntity {
         let mesh = MeshResource.generatePlane(width: width, depth: height)
         let texture = try? TextureResource.load(contentsOf: filePath)
         var material = SimpleMaterial()
@@ -146,12 +154,13 @@ class CustomARView: ARView, ARSessionDelegate{
         let entity = ModelEntity(mesh: mesh, materials: [material])
         
         entity.generateCollisionShapes(recursive: true)
-        entity.name = UUID().uuidString
+        entity.name = name
         
-        installGestures(.translation, for: entity)
+        let gestureRecognizer = installGestures(.translation, for: entity).first
         
         entities.append(entity)
         entityImages[entity.name] = filePath
+        gestures[entity.name] = gestureRecognizer
         
         return entity
     }
@@ -226,8 +235,16 @@ class CustomARView: ARView, ARSessionDelegate{
         }
     }
     
+    func removeGesture(entityName: String) {
+        let recognizerIndex = gestureRecognizers?.firstIndex(of: gestures[entityName]!!)
+        if recognizerIndex != nil {
+            gestureRecognizers?.remove(at: recognizerIndex!)
+        }
+    }
+    
     func hangFrames() {
         var material = SimpleMaterial()
+        print(entityImages)
         
         if Settings.shared.isHanging {
             entities.forEach { entity in
@@ -235,6 +252,9 @@ class CustomARView: ARView, ARSessionDelegate{
                 material.color = .init(tint: .white.withAlphaComponent(0.5), texture: .init(texture!))
                 
                 entity.model?.materials = [material]
+                
+                removeGesture(entityName: entity.name)
+                
             }
         }
         else {
@@ -243,6 +263,9 @@ class CustomARView: ARView, ARSessionDelegate{
                 material.color = .init(tint: .white, texture: .init(texture!))
                 
                 entity.model?.materials = [material]
+                
+                let gestureRecognizer = installGestures(.translation, for: entity).first
+                gestures[entity.name] = gestureRecognizer
             }
         }
     }
@@ -326,73 +349,89 @@ extension CustomARView {
     }
 
     @objc func handleTap(_ sender: UITapGestureRecognizer? = nil) {
-        // location of tap on screen
-        guard let touchInView = sender?.location(in: self) else { return }
-        // entity tapped on screen
-        let hitEntity = self.entity(at: touchInView) as? ModelEntity
-          
-        if hitEntity != nil {
-            // get/set entity information
-            if !entityInfo.contains(where: { $0.key == hitEntity!.name}) {
-                entityInfo[hitEntity!.name] = [
-                    "origTranslateX": Double(hitEntity!.position.x),
-                    "origTranslateY": Double(hitEntity!.position.y),
-                    "origTranslateZ": Double(hitEntity!.position.z),
-                    "newTranslateX": Double(hitEntity!.position.x),
-                    "newTranslateY": Double(hitEntity!.position.y),
-                    "newTranslateZ": Double(hitEntity!.position.z),
-                    "origScaleX": Double(hitEntity!.scale.x),
-                    "origScaleY": Double(hitEntity!.scale.y),
-                    "origScaleZ": Double(hitEntity!.scale.z),
-                    "newScaleX": Double(hitEntity!.scale.x),
-                    "newScaleY": Double(hitEntity!.scale.y),
-                    "newScaleZ": Double(hitEntity!.scale.z),
-                    "scale": Double(1.0),
-                    "origAngle": Double(hitEntity!.orientation.angle),
-                    "newAngle": Double(hitEntity!.orientation.angle)
-                ]
-            }
+        if !Settings.shared.isHanging {
+            // location of tap on screen
+            guard let touchInView = sender?.location(in: self) else { return }
+            // entity tapped on screen
+            let hitEntity = self.entity(at: touchInView) as? ModelEntity
             
-//            Settings.shared.cameraTransform = self.cameraTransform
-            Settings.shared.selectedEntityName = hitEntity!.name
-            Settings.shared.showEntityModal = true
-            
-            if isTapped {
-                // if tapping the same entity that's already selected
-                if hitEntity!.id == selectedEntity!.id {
-                    Settings.shared.showEntityModal = false
-                    isTapped = false
-                    
-                    entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]
-                    // if entity was translated while selected
-                    entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
-                    entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
+            if hitEntity != nil {
+                // get/set entity information
+                if !entityInfo.contains(where: { $0.key == hitEntity!.name}) {
+                    entityInfo[hitEntity!.name] = [
+                        "origTranslateX": Double(hitEntity!.position.x),
+                        "origTranslateY": Double(hitEntity!.position.y),
+                        "origTranslateZ": Double(hitEntity!.position.z),
+                        "newTranslateX": Double(hitEntity!.position.x),
+                        "newTranslateY": Double(hitEntity!.position.y),
+                        "newTranslateZ": Double(hitEntity!.position.z),
+                        "origScaleX": Double(hitEntity!.scale.x),
+                        "origScaleY": Double(hitEntity!.scale.y),
+                        "origScaleZ": Double(hitEntity!.scale.z),
+                        "newScaleX": Double(hitEntity!.scale.x),
+                        "newScaleY": Double(hitEntity!.scale.y),
+                        "newScaleZ": Double(hitEntity!.scale.z),
+                        "scale": Double(1.0),
+                        "origAngle": Double(hitEntity!.orientation.angle),
+                        "newAngle": Double(hitEntity!.orientation.angle)
+                    ]
+                }
+                
+                //            Settings.shared.cameraTransform = self.cameraTransform
+                Settings.shared.selectedEntityName = hitEntity!.name
+                Settings.shared.showEntityModal = true
+                
+                if isTapped {
+                    // if tapping the same entity that's already selected
+                    if hitEntity!.id == selectedEntity!.id {
+                        Settings.shared.showEntityModal = false
+                        isTapped = false
+                        
+                        entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]
+                        // if entity was translated while selected
+                        entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
+                        entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
+                    }
+                    else {
+                        // if tapping on new entity, reset selected entity
+                        entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]
+                        // if entity was translated while selected
+                        entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
+                        entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
+                        
+                        selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                                        y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                                        z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                                           rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                                axis: [0,1,0]),
+                                                           translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                              y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
+                                                                              z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
+                                             relativeTo: selectedEntity!.parent,
+                                             duration: 0.5,
+                                             timingFunction: .easeInOut)
+                        
+                        isSwitching = true
+                        
+                        // reset vars for new entity
+                        selectedEntity = hitEntity
+                        entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(hitEntity!.position.x)
+                        //                    entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]! + 0.2
+                        entityInfo[selectedEntity!.name]!["newTranslateY"] = Double(hitEntity!.position.y + 0.2)
+                        entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(hitEntity!.position.z)
+                        
+                        Settings.shared.scale = entityInfo[selectedEntity!.name]!["scale"]!
+                        // convert radians back to degrees for slider
+                        Settings.shared.angle = (-1 * entityInfo[selectedEntity!.name]!["newAngle"]! * 180) / .pi
+                    }
                 }
                 else {
-                    // if tapping on new entity, reset selected entity
-                    entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]
-                    // if entity was translated while selected
-                    entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
-                    entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
-                    
-                    selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
-                                                                    y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
-                                                                    z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
-                                                       rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
-                                                                            axis: [0,1,0]),
-                                                       translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
-                                                                          y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
-                                                                          z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
-                                         relativeTo: selectedEntity!.parent,
-                                         duration: 0.5,
-                                         timingFunction: .easeInOut)
-                    
-                    isSwitching = true
-                      
+                    // tapping an entity when no other entity is selected
                     // reset vars for new entity
                     selectedEntity = hitEntity
+                    isTapped = true
+                    
                     entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(hitEntity!.position.x)
-//                    entityInfo[selectedEntity!.name]!["newTranslateY"] = entityInfo[selectedEntity!.name]!["origTranslateY"]! + 0.2
                     entityInfo[selectedEntity!.name]!["newTranslateY"] = Double(hitEntity!.position.y + 0.2)
                     entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(hitEntity!.position.z)
                     
@@ -400,66 +439,52 @@ extension CustomARView {
                     // convert radians back to degrees for slider
                     Settings.shared.angle = (-1 * entityInfo[selectedEntity!.name]!["newAngle"]! * 180) / .pi
                 }
+                
+                // scale, rotate, and translate
+                let animation = selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                                                y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                                                z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                                                   rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                                        axis: [0,1,0]),
+                                                                   translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                                      y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
+                                                                                      z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
+                                                     relativeTo: selectedEntity!.parent,
+                                                     duration: 0.5,
+                                                     timingFunction: .easeInOut)
+                
+                // change switching flag once animation is complete to skip scaling when not necessary
+                scene.publisher(for: AnimationEvents.PlaybackCompleted.self)
+                    .filter { $0.playbackController == animation }
+                    .sink(receiveValue: { event in
+                        self.isSwitching = false
+                    }).store(in: &subscriptions)
             }
             else {
-                // tapping an entity when no other entity is selected
-                // reset vars for new entity
-                selectedEntity = hitEntity
-                isTapped = true
-
-                entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(hitEntity!.position.x)
-                entityInfo[selectedEntity!.name]!["newTranslateY"] = Double(hitEntity!.position.y + 0.2)
-                entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(hitEntity!.position.z)
-                
-                Settings.shared.scale = entityInfo[selectedEntity!.name]!["scale"]!
-                // convert radians back to degrees for slider
-                Settings.shared.angle = (-1 * entityInfo[selectedEntity!.name]!["newAngle"]! * 180) / .pi
+                // tapping on empty space on the screen and there is a selected entity
+                if selectedEntity != nil {
+                    // if entity was translated while selected
+                    entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
+                    entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
+                    
+                    // scale and translate
+                    selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
+                                                                    y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
+                                                                    z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
+                                                       rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
+                                                                            axis: [0,1,0]),
+                                                       translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
+                                                                          y: Float(entityInfo[selectedEntity!.name]!["origTranslateY"]!),
+                                                                          z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
+                                         relativeTo: selectedEntity!.parent,
+                                         duration: 0.5,
+                                         timingFunction: .easeInOut)
+                    
+                    Settings.shared.showEntityModal = false
+                    isTapped = false
+                }
+                else { return }
             }
-            
-            // scale, rotate, and translate
-            let animation = selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
-                                                                            y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
-                                                                            z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
-                                                               rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
-                                                                                    axis: [0,1,0]),
-                                                               translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
-                                                                                  y: Float(entityInfo[selectedEntity!.name]!["newTranslateY"]!),
-                                                                                  z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
-                                 relativeTo: selectedEntity!.parent,
-                                 duration: 0.5,
-                                 timingFunction: .easeInOut)
-            
-            // change switching flag once animation is complete to skip scaling when not necessary
-            scene.publisher(for: AnimationEvents.PlaybackCompleted.self)
-                   .filter { $0.playbackController == animation }
-                   .sink(receiveValue: { event in
-                       self.isSwitching = false
-                    }).store(in: &subscriptions)
-        }
-        else {
-            // tapping on empty space on the screen and there is a selected entity
-            if selectedEntity != nil {
-                // if entity was translated while selected
-                entityInfo[selectedEntity!.name]!["newTranslateX"] = Double(selectedEntity!.position.x)
-                entityInfo[selectedEntity!.name]!["newTranslateZ"] = Double(selectedEntity!.position.z)
-                
-                // scale and translate
-                selectedEntity!.move(to: Transform(scale: .init(x: Float(entityInfo[selectedEntity!.name]!["newScaleX"]!),
-                                                                y: Float(entityInfo[selectedEntity!.name]!["newScaleY"]!),
-                                                                z: Float(entityInfo[selectedEntity!.name]!["newScaleZ"]!)),
-                                                   rotation: simd_quatf(angle: Float(entityInfo[selectedEntity!.name]!["newAngle"]!),
-                                                                        axis: [0,1,0]),
-                                                   translation: .init(x: Float(entityInfo[selectedEntity!.name]!["newTranslateX"]!),
-                                                                      y: Float(entityInfo[selectedEntity!.name]!["origTranslateY"]!),
-                                                                      z: Float(entityInfo[selectedEntity!.name]!["newTranslateZ"]!))),
-                                     relativeTo: selectedEntity!.parent,
-                                     duration: 0.5,
-                                     timingFunction: .easeInOut)
-                
-                Settings.shared.showEntityModal = false
-                isTapped = false
-            }
-            else { return }
         }
     }
 }
